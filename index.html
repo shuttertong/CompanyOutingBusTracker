@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚌 Bus Outing Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { Users, Coffee, Music, PartyPopper, Zap, Clock, CheckCircle, AlertCircle, RefreshCw } = lucide;
+
+    const BusTrackerDashboard = () => {
+      // ⚠️ แทนที่ด้วย Google Apps Script URL ของคุณ
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+      
+      const [busData, setBusData] = React.useState({});
+      const [waitlist, setWaitlist] = React.useState([]);
+      const [totalRegistered, setTotalRegistered] = React.useState(0);
+      const [lastUpdate, setLastUpdate] = React.useState(null);
+      const [selectedBus, setSelectedBus] = React.useState(null);
+      const [loading, setLoading] = React.useState(true);
+      const [error, setError] = React.useState(null);
+
+      const busConfig = {
+        '1': { icon: 'Coffee', color: 'bg-green-50 border-green-200', textColor: 'text-green-700' },
+        '888': { icon: 'Music', color: 'bg-blue-50 border-blue-200', textColor: 'text-blue-700' },
+        '3': { icon: 'PartyPopper', color: 'bg-purple-50 border-purple-200', textColor: 'text-purple-700' },
+        '4': { icon: 'Zap', color: 'bg-orange-50 border-orange-200', textColor: 'text-orange-700' },
+        '5': { icon: 'Zap', color: 'bg-red-50 border-red-200', textColor: 'text-red-700' }
+      };
+
+      const getMockData = () => ({
+        buses: {
+          '1': {
+            passengers: [
+              { employeeId: 'EMP001', nickname: 'แจ๊ค', firstChoice: '1', secondChoice: '888', isFirstChoice: true },
+              { employeeId: 'EMP015', nickname: 'ปอนด์', firstChoice: '1', secondChoice: '3', isFirstChoice: true },
+              { employeeId: 'EMP023', nickname: 'มิ้นต์', firstChoice: '1', secondChoice: '888', isFirstChoice: true },
+            ],
+            capacity: 45,
+            name: 'บัสชิลๆ',
+            nameEng: 'Chill Bus'
+          },
+          '888': {
+            passengers: [
+              { employeeId: 'EMP002', nickname: 'เจน', firstChoice: '888', secondChoice: '3', isFirstChoice: true },
+              { employeeId: 'EMP007', nickname: 'ตูน', firstChoice: '888', secondChoice: '4', isFirstChoice: true },
+              { employeeId: 'EMP012', nickname: 'ปุ๊ก', firstChoice: '888', secondChoice: '3', isFirstChoice: true },
+              { employeeId: 'EMP018', nickname: 'เบลล์', firstChoice: '888', secondChoice: '1', isFirstChoice: true },
+              { employeeId: 'EMP025', nickname: 'โอ๊ต', firstChoice: '888', secondChoice: '3', isFirstChoice: true },
+            ],
+            capacity: 45,
+            name: 'บัสอุ่นเครื่อง',
+            nameEng: 'Warm Up Bus'
+          },
+          '3': {
+            passengers: [
+              { employeeId: 'EMP003', nickname: 'บอล', firstChoice: '3', secondChoice: '4', isFirstChoice: true },
+              { employeeId: 'EMP009', nickname: 'ฟิล์ม', firstChoice: '3', secondChoice: '888', isFirstChoice: true },
+            ],
+            capacity: 45,
+            name: 'บัสเปิดปาร์ตี้',
+            nameEng: 'Party Starter Bus'
+          },
+          '4': {
+            passengers: [
+              { employeeId: 'EMP004', nickname: 'เอิร์ธ', firstChoice: '4', secondChoice: '5', isFirstChoice: true },
+              { employeeId: 'EMP011', nickname: 'แบงค์', firstChoice: '4', secondChoice: '3', isFirstChoice: true },
+              { employeeId: 'EMP019', nickname: 'กอล์ฟ', firstChoice: '4', secondChoice: '5', isFirstChoice: true },
+              { employeeId: 'EMP022', nickname: 'ปาล์ม', firstChoice: '4', secondChoice: '3', isFirstChoice: true },
+            ],
+            capacity: 45,
+            name: 'บัสพลังเต็ม',
+            nameEng: 'Full Energy Bus'
+          },
+          '5': {
+            passengers: [
+              { employeeId: 'EMP005', nickname: 'ไมค์', firstChoice: '5', secondChoice: '4', isFirstChoice: true },
+            ],
+            capacity: 45,
+            name: 'บัสไม่มีพัก',
+            nameEng: 'Non-Stop Party Bus'
+          }
+        },
+        waitlist: [],
+        totalRegistered: 15
+      });
+
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          
+          if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyJWOsB72_JiiX2flxnxKWcZ5RlYdFHSorvVd7rnqqcfmzLqm9MWTGFkhiPLZYtpDD0/exec') {
+            setTimeout(() => {
+              const mockData = getMockData();
+              setBusData(mockData.buses);
+              setWaitlist(mockData.waitlist);
+              setTotalRegistered(mockData.totalRegistered);
+              setLastUpdate(new Date());
+              setLoading(false);
+            }, 500);
+            return;
+          }
+
+          const response = await fetch(GOOGLE_SCRIPT_URL);
+          const data = await response.json();
+          
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          
+          setBusData(data.buses);
+          setWaitlist(data.waitlist || []);
+          setTotalRegistered(data.totalRegistered);
+          setLastUpdate(new Date(data.lastUpdate));
+          setLoading(false);
+        } catch (err) {
+          console.error('Error fetching data:', err);
+          setError(err.message);
+          setLoading(false);
+        }
+      };
+
+      React.useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
+      }, []);
+
+      const getAvailableSeats = (bus) => bus.capacity - bus.passengers.length;
+
+      const getStatusBadge = (bus) => {
+        const available = getAvailableSeats(bus);
+        if (available === 0) {
+          return React.createElement('span', { className: 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700' }, 
+            React.createElement(lucide.AlertCircle, { size: 14 }), 'เต็ม');
+        } else if (available <= 5) {
+          return React.createElement('span', { className: 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700' },
+            React.createElement(lucide.Clock, { size: 14 }), 'เหลือน้อย');
+        } else {
+          return React.createElement('span', { className: 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700' },
+            React.createElement(lucide.CheckCircle, { size: 14 }), 'ว่าง');
+        }
+      };
+
+      if (loading) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin text-blue-500 mx-auto mb-4">
+                {React.createElement(lucide.RefreshCw, { size: 48 })}
+              </div>
+              <p className="text-gray-600">กำลังโหลดข้อมูล...</p>
+            </div>
+          </div>
+        );
+      }
+
+      if (error) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+              {React.createElement(lucide.AlertCircle, { size: 48, className: 'text-red-500 mx-auto mb-4' })}
+              <h2 className="text-xl font-bold text-gray-800 mb-2">เกิดข้อผิดพลาด</h2>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button onClick={fetchData} className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                ลองอีกครั้ง
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8">
+          <div className="max-w-7xl mx-auto mb-8">
+            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                    🚌 Company Outing Bus Tracker
+                  </h1>
+                  <p className="text-gray-600">ติดตามสถานะการลงทะเบียนรถบัส</p>
+                </div>
+                <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                  {React.createElement(lucide.RefreshCw, { size: 18 })}
+                  <span className="hidden md:inline">รีเฟรช</span>
+                </button>
+              </div>
+              
+              <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  {React.createElement(lucide.Users, { size: 18, className: 'text-blue-500' })}
+                  <span>จำนวนผู้ลงทะเบียน: <strong>{totalRegistered}</strong> คน</span>
+                </div>
+                {lastUpdate && (
+                  <div className="flex items-center gap-2">
+                    {React.createElement(lucide.Clock, { size: 18, className: 'text-green-500' })}
+                    <span>อัพเดทล่าสุด: {lastUpdate.toLocaleTimeString('th-TH')}</span>
+                  </div>
+                )}
+              </div>
+
+              {waitlist.length > 0 && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-800 font-medium">
+                    ⚠️ มี {waitlist.length} คนที่รถเต็มทั้งสองคัน กำลังรอจัดบัสเพิ่ม
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Object.entries(busData).map(([busId, bus]) => {
+              const config = busConfig[busId];
+              const available = getAvailableSeats(bus);
+              const percentage = ((bus.passengers.length / bus.capacity) * 100).toFixed(0);
+              const firstChoiceCount = bus.passengers.filter(p => p.isFirstChoice).length;
+              const secondChoiceCount = bus.passengers.length - firstChoiceCount;
+
+              return (
+                <div key={busId} className={`${config.color} border-2 rounded-2xl p-6 transition-all hover:shadow-xl cursor-pointer`}
+                  onClick={() => setSelectedBus({ id: busId, ...bus, config })}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`${config.textColor} bg-white p-3 rounded-xl`}>
+                        {React.createElement(lucide[config.icon], { size: 24 })}
+                      </div>
+                      <div>
+                        <h3 className={`text-xl font-bold ${config.textColor}`}>🚌 คันที่ {busId}</h3>
+                        <p className="text-sm text-gray-600">{bus.name}</p>
+                      </div>
+                    </div>
+                    {getStatusBadge(bus)}
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-gray-600">จำนวนผู้โดยสาร</span>
+                      <span className={`font-bold ${config.textColor}`}>{bus.passengers.length}/{bus.capacity}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div className={`h-full ${config.textColor.replace('text-', 'bg-')} transition-all duration-500`}
+                        style={{ width: `${percentage}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                    <div className="bg-white p-2 rounded-lg">
+                      <p className="text-gray-600 text-xs">เลือกอันดับ 1</p>
+                      <p className={`font-bold ${config.textColor}`}>{firstChoiceCount} คน</p>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg">
+                      <p className="text-gray-600 text-xs">ได้รถสำรอง</p>
+                      <p className={`font-bold ${config.textColor}`}>{secondChoiceCount} คน</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <span className="text-gray-600 text-sm">ที่นั่งว่าง</span>
+                    <span className={`text-2xl font-bold ${config.textColor}`}>{available}</span>
+                  </div>
+
+                  <button className={`mt-4 w-full py-2 px-4 rounded-lg ${config.textColor.replace('text-', 'bg-').replace('700', '100')} ${config.textColor} font-medium hover:opacity-80 transition-opacity`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedBus({ id: busId, ...bus, config }); }}>
+                    ดูรายชื่อผู้โดยสาร
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {selectedBus && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              onClick={() => setSelectedBus(null)}>
+              <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden shadow-2xl"
+                onClick={(e) => e.stopPropagation()}>
+                <div className={`${selectedBus.config.color} border-b-2 ${selectedBus.config.color.split(' ')[1]} p-6`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className={`text-2xl font-bold ${selectedBus.config.textColor} mb-1`}>
+                        🚌 คันที่ {selectedBus.id} - {selectedBus.name}
+                      </h2>
+                      <p className="text-gray-600">{selectedBus.passengers.length}/{selectedBus.capacity} ที่นั่ง</p>
+                    </div>
+                    <button onClick={() => setSelectedBus(null)} className="text-gray-500 hover:text-gray-700 text-3xl leading-none">×</button>
+                  </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[calc(80vh-150px)]">
+                  {selectedBus.passengers.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedBus.passengers.map((passenger, index) => (
+                        <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className={`${selectedBus.config.textColor} bg-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0`}>
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-semibold text-gray-800">{passenger.nickname}</p>
+                              {!passenger.isFirstChoice && (
+                                <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">รถสำรอง</span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600">รหัส: {passenger.employeeId}</p>
+                          </div>
+                          <div className="text-xs text-gray-500 hidden md:block flex-shrink-0">
+                            <p>อันดับ 1: คันที่ {passenger.firstChoice}</p>
+                            <p>อันดับ 2: คันที่ {passenger.secondChoice}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      {React.createElement(lucide.Users, { size: 48, className: 'mx-auto mb-4 opacity-50' })}
+                      <p>ยังไม่มีผู้ลงทะเบียนในรถคันนี้</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      React.createElement(BusTrackerDashboard)
+    );
+  </script>
+</body>
+</html>
