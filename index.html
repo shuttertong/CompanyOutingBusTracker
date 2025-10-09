@@ -13,10 +13,8 @@
     import React from 'https://esm.sh/react@18.2.0';
     import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
 
-    // ⚠️ แทนที่ด้วย Google Apps Script URL ของคุณ
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJWOsB72_JiiX2flxnxKWcZ5RlYdFHSorvVd7rnqqcfmzLqm9MWTGFkhiPLZYtpDD0/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuajyofVaFjDgz6vSunXf35cWeNURkJP3BrVOtOIVJcL8Tczg_G48HtwH6z3RXQg/exec';
 
-    // SVG Icons
     const Icons = {
       Users: () => React.createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '24', height: '24', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
         React.createElement('path', { d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' }),
@@ -24,11 +22,11 @@
         React.createElement('path', { d: 'M22 21v-2a4 4 0 0 0-3-3.87' }),
         React.createElement('path', { d: 'M16 3.13a4 4 0 0 1 0 7.75' })
       ),
-      Clock: () => React.createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '24', height: '24', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
+      Clock: () => React.createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '18', height: '18', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
         React.createElement('circle', { cx: '12', cy: '12', r: '10' }),
         React.createElement('polyline', { points: '12 6 12 12 16 14' })
       ),
-      RefreshCw: () => React.createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '24', height: '24', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
+      RefreshCw: () => React.createElement('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '18', height: '18', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
         React.createElement('polyline', { points: '23 4 23 10 17 10' }),
         React.createElement('polyline', { points: '1 20 1 14 7 14' }),
         React.createElement('path', { d: 'M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15' })
@@ -80,63 +78,68 @@
       const [error, setError] = React.useState(null);
 
       const busConfig = {
-        '1': { Icon: Icons.Coffee, color: 'bg-green-50 border-green-200', textColor: 'text-green-700' },
-        '888': { Icon: Icons.Music, color: 'bg-blue-50 border-blue-200', textColor: 'text-blue-700' },
-        '3': { Icon: Icons.PartyPopper, color: 'bg-purple-50 border-purple-200', textColor: 'text-purple-700' },
-        '4': { Icon: Icons.Zap, color: 'bg-orange-50 border-orange-200', textColor: 'text-orange-700' },
-        '5': { Icon: Icons.Zap, color: 'bg-red-50 border-red-200', textColor: 'text-red-700' }
+        '1': { 
+          Icon: Icons.Coffee, 
+          color: 'bg-green-50 border-green-200', 
+          textColor: 'text-green-700',
+          emoji: '☕️',
+          name: 'บัสชิลๆ',
+          subtitle: 'สายชิลล์ นั่งดูวิว',
+          note: '(นายญี่ปุ่น 3 คน)'
+        },
+        '2': { 
+          Icon: Icons.Music, 
+          color: 'bg-blue-50 border-blue-200', 
+          textColor: 'text-blue-700',
+          emoji: '😊',
+          name: 'บัสอุ่นเครื่อง',
+          subtitle: 'บรรยากาศดีๆ แต่เริ่มมีพลัง!',
+          note: '(นายญี่ปุ่น 3 คน)(MD)'
+        },
+        '3': { 
+          Icon: Icons.PartyPopper, 
+          color: 'bg-purple-50 border-purple-200', 
+          textColor: 'text-purple-700',
+          emoji: '🎉',
+          name: 'บัสเปิดปาร์ตี้',
+          subtitle: 'มันส์ปานกลาง!',
+          note: ''
+        },
+        '4': { 
+          Icon: Icons.Zap, 
+          color: 'bg-orange-50 border-orange-200', 
+          textColor: 'text-orange-700',
+          emoji: '🔥',
+          name: 'บัสพลังเต็ม',
+          subtitle: 'โหมดปาร์ตี้เต็มสูบ!',
+          note: ''
+        },
+        '5': { 
+          Icon: Icons.Zap, 
+          color: 'bg-red-50 border-red-200', 
+          textColor: 'text-red-700',
+          emoji: '⚡️',
+          name: 'บัสไม่มีพัก',
+          subtitle: 'บัสนี้ไม่มีคำว่าพัก!',
+          note: ''
+        }
       };
 
       const getMockData = () => ({
         buses: {
-          '1': {
-            passengers: [
-              { employeeId: 'EMP001', nickname: 'แจ๊ค', firstChoice: '1', secondChoice: '888', isFirstChoice: true },
-              { employeeId: 'EMP015', nickname: 'ปอนด์', firstChoice: '1', secondChoice: '3', isFirstChoice: true },
-              { employeeId: 'EMP023', nickname: 'มิ้นต์', firstChoice: '1', secondChoice: '888', isFirstChoice: true },
-            ],
-            capacity: 45,
-            name: 'บัสชิลๆ'
-          },
-          '888': {
-            passengers: [
-              { employeeId: 'EMP002', nickname: 'เจน', firstChoice: '888', secondChoice: '3', isFirstChoice: true },
-              { employeeId: 'EMP007', nickname: 'ตูน', firstChoice: '888', secondChoice: '4', isFirstChoice: true },
-              { employeeId: 'EMP012', nickname: 'ปุ๊ก', firstChoice: '888', secondChoice: '3', isFirstChoice: true },
-              { employeeId: 'EMP018', nickname: 'เบลล์', firstChoice: '888', secondChoice: '1', isFirstChoice: true },
-              { employeeId: 'EMP025', nickname: 'โอ๊ต', firstChoice: '888', secondChoice: '3', isFirstChoice: true },
-            ],
-            capacity: 45,
-            name: 'บัสอุ่นเครื่อง'
-          },
-          '3': {
-            passengers: [
-              { employeeId: 'EMP003', nickname: 'บอล', firstChoice: '3', secondChoice: '4', isFirstChoice: true },
-              { employeeId: 'EMP009', nickname: 'ฟิล์ม', firstChoice: '3', secondChoice: '888', isFirstChoice: true },
-            ],
-            capacity: 45,
-            name: 'บัสเปิดปาร์ตี้'
-          },
-          '4': {
-            passengers: [
-              { employeeId: 'EMP004', nickname: 'เอิร์ธ', firstChoice: '4', secondChoice: '5', isFirstChoice: true },
-              { employeeId: 'EMP011', nickname: 'แบงค์', firstChoice: '4', secondChoice: '3', isFirstChoice: true },
-              { employeeId: 'EMP019', nickname: 'กอล์ฟ', firstChoice: '4', secondChoice: '5', isFirstChoice: true },
-              { employeeId: 'EMP022', nickname: 'ปาล์ม', firstChoice: '4', secondChoice: '3', isFirstChoice: true },
-            ],
-            capacity: 45,
-            name: 'บัสพลังเต็ม'
-          },
-          '5': {
-            passengers: [
-              { employeeId: 'EMP005', nickname: 'ไมค์', firstChoice: '5', secondChoice: '4', isFirstChoice: true },
-            ],
-            capacity: 45,
-            name: 'บัสไม่มีพัก'
-          }
+          '1': { passengers: [], capacity: 45, name: 'บัสชิลๆ' },
+          '2': { passengers: [
+            { employeeId: 'EMP002', nickname: 'เจน', firstChoice: '2', secondChoice: '3', isFirstChoice: true },
+            { employeeId: 'EMP007', nickname: 'ตูน', firstChoice: '2', secondChoice: '4', isFirstChoice: true },
+            { employeeId: 'EMP012', nickname: 'ปุ๊ก', firstChoice: '2', secondChoice: '3', isFirstChoice: true },
+            { employeeId: 'EMP018', nickname: 'เบลล์', firstChoice: '2', secondChoice: '1', isFirstChoice: true },
+          ], capacity: 45, name: 'บัสอุ่นเครื่อง' },
+          '3': { passengers: [], capacity: 45, name: 'บัสเปิดปาร์ตี้' },
+          '4': { passengers: [], capacity: 45, name: 'บัสพลังเต็ม' },
+          '5': { passengers: [], capacity: 45, name: 'บัสไม่มีพัก' }
         },
         waitlist: [],
-        totalRegistered: 15
+        totalRegistered: 4
       });
 
       const fetchData = async () => {
@@ -144,18 +147,6 @@
           setLoading(true);
           setError(null);
           
-          if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
-            setTimeout(() => {
-              const mockData = getMockData();
-              setBusData(mockData.buses);
-              setWaitlist(mockData.waitlist);
-              setTotalRegistered(mockData.totalRegistered);
-              setLastUpdate(new Date());
-              setLoading(false);
-            }, 500);
-            return;
-          }
-
           const response = await fetch(GOOGLE_SCRIPT_URL);
           const data = await response.json();
           
@@ -168,7 +159,11 @@
           setLoading(false);
         } catch (err) {
           console.error('Error:', err);
-          setError(err.message);
+          const mockData = getMockData();
+          setBusData(mockData.buses);
+          setWaitlist(mockData.waitlist);
+          setTotalRegistered(mockData.totalRegistered);
+          setLastUpdate(new Date());
           setLoading(false);
         }
       };
@@ -253,6 +248,8 @@
         React.createElement('div', { className: 'max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
           Object.entries(busData).map(([busId, bus]) => {
             const config = busConfig[busId];
+            if (!config) return null;
+            
             const available = getAvailableSeats(bus);
             const percentage = ((bus.passengers.length / bus.capacity) * 100).toFixed(0);
             const firstChoiceCount = bus.passengers.filter(p => p.isFirstChoice).length;
@@ -264,16 +261,27 @@
               onClick: () => setSelectedBus({ id: busId, ...bus, config })
             },
               React.createElement('div', { className: 'flex items-start justify-between mb-4' },
-                React.createElement('div', { className: 'flex items-center gap-3' },
-                  React.createElement('div', { className: `${config.textColor} bg-white p-3 rounded-xl` },
+                React.createElement('div', { className: 'flex items-center gap-3 flex-1' },
+                  React.createElement('div', { className: `${config.textColor} bg-white p-3 rounded-xl flex-shrink-0` },
                     React.createElement(config.Icon)
                   ),
-                  React.createElement('div', null,
-                    React.createElement('h3', { className: `text-xl font-bold ${config.textColor}` }, `🚌 คันที่ ${busId}`),
-                    React.createElement('p', { className: 'text-sm text-gray-600' }, bus.name)
+                  React.createElement('div', { className: 'flex-1 min-w-0' },
+                    React.createElement('h3', { className: `text-xl font-bold ${config.textColor} flex items-center gap-2 flex-wrap` }, 
+                      '🚌 คันที่ ', busId,
+                      busId === '4' && React.createElement('span', { className: 'text-sm font-normal' }, '(888)')
+                    ),
+                    React.createElement('p', { className: 'text-sm font-semibold text-gray-700 mt-1' }, 
+                      config.emoji, ' ', config.name
+                    ),
+                    React.createElement('p', { className: 'text-xs text-gray-600 mt-1' }, 
+                      config.subtitle
+                    ),
+                    config.note && React.createElement('p', { className: 'text-xs text-gray-500 italic mt-1' }, 
+                      config.note
+                    )
                   )
                 ),
-                getStatusBadge(bus)
+                React.createElement('div', { className: 'flex-shrink-0 ml-2' }, getStatusBadge(bus))
               ),
               React.createElement('div', { className: 'mb-4' },
                 React.createElement('div', { className: 'flex justify-between text-sm mb-2' },
@@ -319,8 +327,13 @@
             React.createElement('div', { className: `${selectedBus.config.color} border-b-2 ${selectedBus.config.color.split(' ')[1]} p-6` },
               React.createElement('div', { className: 'flex items-center justify-between' },
                 React.createElement('div', null,
-                  React.createElement('h2', { className: `text-2xl font-bold ${selectedBus.config.textColor} mb-1` }, `🚌 คันที่ ${selectedBus.id} - ${selectedBus.name}`),
-                  React.createElement('p', { className: 'text-gray-600' }, `${selectedBus.passengers.length}/${selectedBus.capacity} ที่นั่ง`)
+                  React.createElement('h2', { className: `text-2xl font-bold ${selectedBus.config.textColor} mb-1 flex items-center gap-2` }, 
+                    `🚌 คันที่ ${selectedBus.id}`,
+                    selectedBus.id === '4' && ' (888)',
+                    ` - ${selectedBus.config.emoji} ${selectedBus.name}`
+                  ),
+                  React.createElement('p', { className: 'text-sm text-gray-600 mt-1' }, selectedBus.config.subtitle),
+                  React.createElement('p', { className: 'text-gray-600 mt-2' }, `${selectedBus.passengers.length}/${selectedBus.capacity} ที่นั่ง`)
                 ),
                 React.createElement('button', {
                   onClick: () => setSelectedBus(null),
